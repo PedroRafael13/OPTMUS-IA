@@ -1,0 +1,24 @@
+/* radar-frontend/src/App.css */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-area {
+  padding: 2rem;
+  background-color: #f4f7fe;
+  flex-grow: 1; /* Faz a área de conteúdo preencher o espaço disponível */
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}

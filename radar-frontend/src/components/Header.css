@@ -1,0 +1,46 @@
+/* radar-frontend/src/components/Header.css */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-title h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #2c2a5a;
+}
+
+.header-title span {
+  font-size: 1rem;
+  color: #777;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 1rem;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background-color: #f0f0f0;
+}
+
+.btn.btn-primary {
+  background-color: #1e87f0;
+  color: #fff;
+  border-color: #1e87f0;
+}
+
+.btn.btn-primary:hover {
+  background-color: #0d73d8;
+}

@@ -1,0 +1,20 @@
+/* src/pages/DebtAnalysisPage.css */
+.strategic-section, .details-section {
+    margin-top: 2rem;
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.strategic-section h3, .details-section h3 {
+    margin-top: 0;
+    color: #2c2a5a;
+}
+.details-section ul {
+    list-style: none;
+    padding: 0;
+}
+.details-section li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}

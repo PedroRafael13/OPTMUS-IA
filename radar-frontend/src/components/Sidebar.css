@@ -1,0 +1,113 @@
+/* src/components/Sidebar.css */
+
+.sidebar {
+  width: 280px;
+  background-color: #3f3d7e; /* Roxo mais fiel ao design */
+  color: #fff;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  padding: 0 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.unified-view {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+}
+.unified-view span {
+  font-size: 0.75rem;
+  color: #c4c3e0;
+  font-weight: 600;
+}
+.unified-view p {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.status-badge.active {
+  font-size: 0.7rem;
+  background-color: #28a745;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.section-title {
+  color: #a9a7d1;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.company-item {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  font-weight: 600;
+}
+.company-item:hover {
+  background-color: #4a488a;
+}
+.company-item.selected {
+  background-color: #007bff;
+}
+
+.main-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.5rem;
+}
+
+.nav-item {
+    color: #c4c3e0;
+    text-decoration: none;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    transition: color 0.2s, background-color 0.2s;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.nav-item:hover {
+    color: #fff;
+    background-color: #4a488a;
+}
+.nav-item.active {
+    color: #fff;
+    background-color: rgba(0, 123, 255, 0.2);
+    border: 1px solid rgba(0, 123, 255, 0.5);
+    font-weight: 700;
+}
+
+.notification-badge {
+  background-color: #007bff;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.notification-badge.error {
+    background-color: #dc3545;
+}
+.notification-badge.warning {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.error-message {
+    padding: 1rem;
+    color: #ffcccc;
+    font-size: 0.9rem;
+}

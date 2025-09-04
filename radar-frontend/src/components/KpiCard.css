@@ -1,0 +1,2 @@
+/* src/components/KpiCard.css */
+.kpi-card{display:flex;background-color:#fff;padding:1.5rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05);gap:1rem;align-items:center;}.card-value{font-size:2rem;font-weight:700;color:#2c2a5a;margin:0.25rem 0;}.card-title{color:#777;font-weight:600;}.card-subtitle{font-size:0.8rem;}.card-subtitle.positive{color:#28a745;}.card-subtitle.negative{color:#dc3545;}
