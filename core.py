@@ -16,7 +16,6 @@ import ui
 import database
 import openai
 import google.generativeai as genai
-from serpapi import GoogleSearch
 
 # Configuração das APIs de IA
 if OPENAI_API_KEY and "SUA_CHAVE" not in OPENAI_API_KEY:
