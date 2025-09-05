@@ -8,6 +8,7 @@ import Header from './components/Header';
 import GeneralDashboard from './pages/GeneralDashboard';
 import AlertsDashboard from './pages/AlertsDashboard';
 import DebtAnalysisPage from './pages/DebtAnalysisPage';
+import './App.css';
 
 // Placeholders para as futuras páginas, para a navegação funcionar sem erros
 const ContractsPage = () => <h2>Página de Contratos (Em construção)</h2>;
@@ -15,8 +16,6 @@ const RecommendationsPage = () => <h2>Página de Recomendações (Em construçã
 const MarketPage = () => <h2>Página de Análise de Mercado (Em construção)</h2>;
 const BenchmarkingPage = () => <h2>Página de Benchmarking (Em construção)</h2>;
 
-
-import './App.css';
 
 function App() {
   // Estado para guardar qual cliente está selecionado globalmente
