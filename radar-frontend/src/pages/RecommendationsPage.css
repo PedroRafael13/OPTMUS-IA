@@ -1,0 +1,63 @@
+.recommendations-page .recommendations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.recommendations-page h3 {
+    margin: 0;
+    color: #2c2a5a;
+}
+
+.recommendations-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.rec-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.rec-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.rec-card h4 {
+    margin: 0;
+    color: #3f3d7e;
+}
+
+.rec-card p {
+    color: #555;
+    line-height: 1.6;
+}
+
+.rec-card-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.priority-high { background-color: #dc3545; }
+.priority-medium { background-color: #ffc107; color: #333; }
+.priority-low { background-color: #28a745; }

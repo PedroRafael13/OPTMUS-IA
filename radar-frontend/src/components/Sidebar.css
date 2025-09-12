@@ -39,12 +39,25 @@
   display: inline-block;
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 0.5rem;
+}
+
 .section-title {
   color: #a9a7d1;
   text-transform: uppercase;
   font-size: 0.8rem;
   font-weight: 700;
   margin-bottom: 1rem;
+}
+
+.company-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* Espaço para a barra de rolagem */
 }
 
 .company-item {
@@ -78,6 +91,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* --- NOVAS REGRAS PARA CORRIGIR O DESIGN DO BOTÃO --- */
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    /* --- FIM DAS NOVAS REGRAS --- */
 }
 .nav-item:hover {
     color: #fff;
@@ -88,6 +110,10 @@
     background-color: rgba(0, 123, 255, 0.2);
     border: 1px solid rgba(0, 123, 255, 0.5);
     font-weight: 700;
+}
+
+.nav-item span:first-child {
+  flex-grow: 1; /* Garante que o texto empurre a notificação para a direita */
 }
 
 .notification-badge {
@@ -110,4 +136,24 @@
     padding: 1rem;
     color: #ffcccc;
     font-size: 0.9rem;
+}
+
+.add-client-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding: 0;
+    margin-bottom: 1rem; /* Alinha com o margin-bottom do título */
+}
+
+.add-client-btn:hover {
+    background-color: #0056b3;
 }

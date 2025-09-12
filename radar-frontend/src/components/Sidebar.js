@@ -1,33 +1,30 @@
-// src/components/Sidebar.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Sidebar.css';
 
-function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany }) {
+function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, onRegisterClick, refreshClients }) {
   const [clientes, setClientes] = useState([]);
   const [notifications, setNotifications] = useState({});
   const [error, setError] = useState(null);
 
-  // Efeito para buscar a lista de clientes (roda apenas uma vez)
-  useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:5000/api/clientes');
-        if (!response.ok) throw new Error('API de clientes falhou');
-        const data = await response.json();
-        setClientes(data);
-        if (data.length > 0 && !selectedCompany) {
-          onCompanySelect(data[0]);
-        }
-      } catch (err) {
-        setError("Falha ao carregar clientes.");
-        console.error(err);
+  const fetchClientes = useCallback(async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/clientes');
+      if (!response.ok) throw new Error('API de clientes falhou');
+      const data = await response.json();
+      setClientes(data);
+      if (data.length > 0 && !selectedCompany) {
+        onCompanySelect(data[0]);
       }
-    };
-    fetchClientes();
+    } catch (err) {
+      setError("Falha ao carregar clientes.");
+      console.error(err);
+    }
   }, [onCompanySelect, selectedCompany]);
 
-  // Efeito para buscar as notificações (roda sempre que um novo cliente é selecionado)
+  useEffect(() => {
+    fetchClientes();
+  }, [refreshClients, fetchClientes]);
+
   useEffect(() => {
     if (selectedCompany) {
       const fetchNotifications = async () => {
@@ -38,6 +35,7 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany })
           setNotifications(data);
         } catch (err) {
           console.error("Erro ao buscar notificações:", err);
+          setNotifications({});
         }
       };
       fetchNotifications();
@@ -49,45 +47,55 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany })
       <div className="sidebar-section">
         <div className="unified-view">
           <span>VISÃO UNIFICADA</span>
-          <p>Consolidado</p>
+          <p>RADAR OPTMUS</p>
           <span className="status-badge active">Ativa</span>
         </div>
       </div>
 
       <div className="sidebar-section">
-        <h4 className="section-title">CLIENTES</h4>
+        <div className="section-header">
+            <h4 className="section-title">CLIENTES</h4>
+            <button className="add-client-btn" onClick={onRegisterClick}>+</button>
+        </div>
         {error && <div className="error-message">{error}</div>}
-        {clientes.map(cliente => (
-          <div 
-            key={cliente.id} 
-            className={`company-item ${selectedCompany && selectedCompany.id === cliente.id ? 'selected' : ''}`}
-            onClick={() => onCompanySelect(cliente)}
-          >
-            {cliente.internal_alias}
-          </div>
-        ))}
+        <div className="company-list">
+            {clientes.map(cliente => (
+              <div 
+                key={cliente.id} 
+                className={`company-item ${selectedCompany && selectedCompany.id === cliente.id ? 'selected' : ''}`}
+                onClick={() => onCompanySelect(cliente)}
+              >
+                {cliente.internal_alias}
+              </div>
+            ))}
+        </div>
       </div>
 
       <nav className="main-nav">
           <h4 className="section-title">ANÁLISE E ESTRATÉGIA</h4>
-          <a href="#" onClick={() => onViewChange('general')} className={`nav-item ${activeView === 'general' ? 'active' : ''}`}>
-            Dashboard Geral
+          <button onClick={() => onViewChange('general')} className={`nav-item ${activeView === 'general' ? 'active' : ''}`}>
+            <span>Dashboard Geral</span>
             {notifications.dashboard > 0 && <span className="notification-badge">{notifications.dashboard}</span>}
-          </a>
-          <a href="#" onClick={() => onViewChange('alerts')} className={`nav-item ${activeView === 'alerts' ? 'active' : ''}`}>Alertas e Insights</a>
-          <a href="#" onClick={() => onViewChange('debts')} className={`nav-item ${activeView === 'debts' ? 'active' : ''}`}>
-            Análise de Dívidas
-            {notifications.dividas > 0 && <span className="notification-badge error">{notifications.dividas}</span>}
-          </a>
-          {/* Adicione os outros links aqui, como Mercado e Benchmarking */}
+          </button>
+          <button onClick={() => onViewChange('alerts')} className={`nav-item ${activeView === 'alerts' ? 'active' : ''}`}>
+            <span>Alertas e Insights</span>
+          </button>
+          <button onClick={() => onViewChange('market')} className={`nav-item ${activeView === 'market' ? 'active' : ''}`}>
+            <span>Análise de Mercado</span>
+          </button>
+          <button onClick={() => onViewChange('recommendations')} className={`nav-item ${activeView === 'recommendations' ? 'active' : ''}`}>
+            <span>Recomendações (IA)</span>
+          </button>
 
           <h4 className="section-title">GESTÃO</h4>
-          <a href="#" className="nav-item">
-            Contratos
+          <button onClick={() => onViewChange('debts')} className={`nav-item ${activeView === 'debts' ? 'active' : ''}`}>
+            <span>Análise de Dívidas</span>
+            {notifications.dividas > 0 && <span className="notification-badge error">{notifications.dividas}</span>}
+          </button>
+          <button onClick={() => onViewChange('contracts')} className={`nav-item ${activeView === 'contracts' ? 'active' : ''}`}>
+            <span>Contratos</span>
             {notifications.contratos > 0 && <span className="notification-badge warning">{notifications.contratos}</span>}
-          </a>
-          <a href="#" className="nav-item">Financeiro</a>
-          <a href="#" className="nav-item">Recomendações</a>
+          </button>
       </nav>
     </aside>
   );

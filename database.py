@@ -157,9 +157,9 @@ def save_company_data(internal_alias, all_data):
             :google_rating, :credit_score, :financial_pendencies, :municipality_population)
         """, p)
         conn.commit()
-        return True
+        return cursor.lastrowid
     except sqlite3.IntegrityError:
-        return False
+        return None
     finally:
         conn.close()
 
@@ -334,31 +334,47 @@ def get_financial_dashboard_data(period_days=30, company_id=None):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
+    
     end_date = datetime.now()
     start_date_current = end_date - timedelta(days=period_days)
     end_date_previous = start_date_current
     start_date_previous = end_date_previous - timedelta(days=period_days)
-    params = [start_date_current.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), start_date_previous.strftime('%Y-%m-%d'), end_date_previous.strftime('%Y-%m-%d')]
-    where_clause = ""
-    if company_id:
-        where_clause = " WHERE company_id = ?"
-        params.append(company_id)
-    query = f"""
+
+    # Base query
+    base_query = """
         SELECT
             transaction_type,
             SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END) as current_period_total,
             SUM(CASE WHEN transaction_date BETWEEN ? AND ? THEN amount ELSE 0 END) as previous_period_total
-        FROM financial_transactions {where_clause} GROUP BY transaction_type;
+        FROM financial_transactions
     """
+    
+    # Parameters for the date ranges
+    params = [
+        start_date_current.strftime('%Y-%m-%d'), 
+        end_date.strftime('%Y-%m-%d'), 
+        start_date_previous.strftime('%Y-%m-%d'), 
+        end_date_previous.strftime('%Y-%m-%d')
+    ]
+
+    # Dynamically add a WHERE clause if a company_id is provided
+    if company_id:
+        query = base_query + " WHERE company_id = ? GROUP BY transaction_type;"
+        params.append(company_id)
+    else:
+        query = base_query + " GROUP BY transaction_type;"
+
     cursor.execute(query, params)
+    
     data = {'current_revenue': 0.0, 'previous_revenue': 0.0, 'current_expenses': 0.0, 'previous_expenses': 0.0}
     for row in cursor.fetchall():
         if row['transaction_type'] == 'entrada':
-            data['current_revenue'] = row['current_period_total'] if row['current_period_total'] else 0.0
-            data['previous_revenue'] = row['previous_period_total'] if row['previous_period_total'] else 0.0
+            data['current_revenue'] = row['current_period_total'] or 0.0
+            data['previous_revenue'] = row['previous_period_total'] or 0.0
         elif row['transaction_type'] == 'saida':
-            data['current_expenses'] = row['current_period_total'] if row['current_period_total'] else 0.0
-            data['previous_expenses'] = row['previous_period_total'] if row['previous_period_total'] else 0.0
+            data['current_expenses'] = row['current_period_total'] or 0.0
+            data['previous_expenses'] = row['previous_period_total'] or 0.0
+            
     conn.close()
     return data
 
@@ -382,7 +398,6 @@ def delete_company_by_id(company_id):
     deleted_rows = cursor.rowcount
     conn.close()
     return deleted_rows > 0
-# Adicione esta função dentro do seu arquivo database.py
 
 def get_monthly_revenue_evolution(company_id=None):
     """Busca a evolução da receita (entradas) dos últimos 6 meses."""
@@ -408,14 +423,13 @@ def get_monthly_revenue_evolution(company_id=None):
 
     cursor.execute(query, params)
 
-    # Formata os dados para o gráfico
-    evolution_data = []
-    months = [(datetime.now() - timedelta(days=30*i)).strftime('%b') for i in range(5, -1, -1)]
     db_results = {row[0]: row[1] for row in cursor.fetchall()}
-
+    
+    evolution_data = []
     for i in range(5, -1, -1):
-        month_key = (datetime.now() - timedelta(days=30*i)).strftime('%Y-%m')
-        month_name = months[5-i]
+        date_obj = datetime.now() - timedelta(days=30*i)
+        month_key = date_obj.strftime('%Y-%m')
+        month_name = date_obj.strftime('%b')
         evolution_data.append({
             "name": month_name,
             "Receita": db_results.get(month_key, 0)
@@ -423,3 +437,28 @@ def get_monthly_revenue_evolution(company_id=None):
 
     conn.close()
     return evolution_data
+
+def get_expiring_contracts(days_ahead=90, company_id=None):
+    """Busca contratos que irão vencer nos próximos 'days_ahead' dias."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    today = datetime.now().date()
+    end_date = today + timedelta(days=days_ahead)
+    
+    query = """
+        SELECT c.id, c.service_description, c.monthly_price, c.due_date
+        FROM contracts c
+        WHERE c.due_date BETWEEN ? AND ?
+    """
+    params = [today.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')]
+
+    if company_id:
+        query += " AND c.company_id = ?"
+        params.append(company_id)
+    
+    cursor.execute(query, params)
+    contracts = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return contracts
