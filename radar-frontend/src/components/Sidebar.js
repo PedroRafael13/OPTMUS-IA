@@ -1,3 +1,5 @@
+// src/components/Sidebar.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import './Sidebar.css';
 
@@ -88,6 +90,9 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
           </button>
 
           <h4 className="section-title">GESTÃO</h4>
+          <button onClick={() => onViewChange('financials')} className={`nav-item ${activeView === 'financials' ? 'active' : ''}`}>
+            <span>Financeiro</span>
+          </button>
           <button onClick={() => onViewChange('debts')} className={`nav-item ${activeView === 'debts' ? 'active' : ''}`}>
             <span>Análise de Dívidas</span>
             {notifications.dividas > 0 && <span className="notification-badge error">{notifications.dividas}</span>}

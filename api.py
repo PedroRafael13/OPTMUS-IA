@@ -6,18 +6,22 @@ import database
 import core
 
 app = Flask(__name__)
+# Habilita o CORS para permitir a comunicação com o frontend
 CORS(app)
 
+# Garante que o banco de dados e as tabelas existam ao iniciar
 database.setup_database()
 
 @app.route("/")
 def index():
+    """Rota inicial para verificar se a API está funcionando."""
     return jsonify({"message": "API do RADAR OPTMUS está no ar!"})
 
 # --- CLIENTES E DIAGNÓSTICO ---
 
 @app.route("/api/clientes", methods=['GET'])
 def get_clientes():
+    """Endpoint para listar todos os clientes cadastrados."""
     try:
         clientes = database.get_all_companies()
         return jsonify(clientes)
@@ -26,6 +30,7 @@ def get_clientes():
 
 @app.route("/api/clientes", methods=['POST'])
 def register_cliente():
+    """Endpoint para cadastrar um novo cliente a partir de um CNPJ."""
     data = request.json
     alias = data.get('alias')
     cnpj = data.get('cnpj')
@@ -56,12 +61,14 @@ def register_cliente():
 
 @app.route("/api/clientes/<int:company_id>", methods=['DELETE'])
 def delete_cliente(company_id):
+    """Endpoint para excluir um cliente."""
     if database.delete_company_by_id(company_id):
         return jsonify({"message": "Client deleted successfully"}), 200
     return jsonify({"error": "Client not found or could not be deleted"}), 404
 
 @app.route("/api/diagnostico/<int:company_id>", methods=['GET'])
 def get_full_diagnostic(company_id):
+    """Endpoint para obter um diagnóstico completo de um cliente."""
     company = next((c for c in database.get_all_companies() if c['id'] == company_id), None)
     if not company:
         return jsonify({"error": "Company not found"}), 404
@@ -73,6 +80,7 @@ def get_full_diagnostic(company_id):
 
 @app.route("/api/mercado/analise/<int:company_id>", methods=['POST'])
 def run_market_analysis(company_id):
+    """Endpoint para executar e salvar a análise de mercado."""
     company = next((c for c in database.get_all_companies() if c['id'] == company_id), None)
     if not company:
         return jsonify({"error": "Company not found"}), 404
@@ -90,11 +98,13 @@ def run_market_analysis(company_id):
 
 @app.route("/api/recomendacoes/<int:company_id>", methods=['GET'])
 def get_recommendations(company_id):
+    """Endpoint para buscar as recomendações de IA existentes."""
     recs = database.get_recommendations(company_id)
     return jsonify(recs)
 
 @app.route("/api/recomendacoes/<int:company_id>/gerar", methods=['POST'])
 def generate_recommendations_route(company_id):
+    """Endpoint para gerar e salvar novas recomendações de IA."""
     new_recs = core.generate_recommendations(company_id)
     if new_recs:
         database.save_recommendations(company_id, new_recs)
@@ -105,6 +115,7 @@ def generate_recommendations_route(company_id):
 
 @app.route("/api/dashboard/general/<int:company_id>", methods=['GET'])
 def get_general_dashboard(company_id):
+    """Endpoint que retorna os dados para os cards principais do dashboard."""
     company = next((c for c in database.get_all_companies() if c['id'] == company_id), None)
     if not company:
         return jsonify({"error": "Company not found"}), 404
@@ -126,8 +137,46 @@ def get_general_dashboard(company_id):
     }
     return jsonify(dashboard_summary)
 
+@app.route("/api/financeiro/dashboard/<int:company_id>", methods=['GET'])
+def get_financial_dashboard(company_id):
+    """Endpoint que retorna todos os dados para a página financeira avançada."""
+    try:
+        # 1. Dados para os KPIs
+        performance_data = database.get_financial_dashboard_data(period_days=30, company_id=company_id)
+        
+        receita_bruta = performance_data.get('current_revenue', 0.0)
+        despesas_totais = performance_data.get('current_expenses', 0.0)
+        margem_liquida = receita_bruta - despesas_totais
+
+        kpis = {
+            "receita_bruta": receita_bruta,
+            "despesas_totais": despesas_totais,
+            "margem_liquida": margem_liquida,
+            "fluxo_liquido": margem_liquida # Em um DRE simples, são iguais
+        }
+
+        # 2. Dados para Análise Qualitativa
+        contracts = database.get_all_contracts_with_company_info(company_id=company_id)
+        active_contracts_value = sum(c['monthly_price'] for c in contracts)
+        qualitative_analysis = core.generate_financial_analysis(performance_data, active_contracts_value)
+
+        # 3. Dados para o Gráfico de Projeção
+        projection_chart_data = core.generate_cash_flow_projection_chart_data(company_id, contracts)
+
+        dashboard_data = {
+            "kpis": kpis,
+            "qualitative_analysis": qualitative_analysis,
+            "projection_chart_data": projection_chart_data
+        }
+        
+        return jsonify(dashboard_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/financeiro/faturamento/<int:company_id>", methods=['PUT'])
 def set_annual_revenue(company_id):
+    """Endpoint para definir o faturamento anual de um cliente."""
     data = request.json
     revenue = data.get('annual_revenue')
     if revenue is None:
@@ -137,6 +186,7 @@ def set_annual_revenue(company_id):
 
 @app.route("/api/financeiro/fluxo-caixa/<int:company_id>", methods=['PUT'])
 def set_cash_flow(company_id):
+    """Endpoint para definir o fluxo de caixa mensal de um cliente."""
     data = request.json
     cash_flow = data.get('monthly_cash_flow')
     if cash_flow is None:
@@ -146,6 +196,7 @@ def set_cash_flow(company_id):
 
 @app.route("/api/transacoes", methods=['POST'])
 def add_transaction():
+    """Endpoint para adicionar uma nova transação financeira."""
     data = request.json
     if not all(k in data for k in ['date', 'type', 'amount', 'description']):
         return jsonify({"error": "Missing required fields"}), 400
@@ -156,6 +207,7 @@ def add_transaction():
 
 @app.route("/api/debts/<int:company_id>", methods=['GET'])
 def get_debt_analysis(company_id):
+    """Endpoint que retorna os dados quantitativos e qualitativos das dívidas."""
     company = next((c for c in database.get_all_companies() if c['id'] == company_id), None)
     if not company:
         return jsonify({"error": "Company not found"}), 404
@@ -177,6 +229,7 @@ def get_debt_analysis(company_id):
 
 @app.route("/api/debts/<int:company_id>", methods=['POST'])
 def add_manual_debt(company_id):
+    """Endpoint para adicionar uma dívida manualmente."""
     data = request.json
     if not all(k in data for k in ['debt_type', 'creditor', 'balance']):
         return jsonify({"error": "Missing required fields"}), 400
@@ -188,11 +241,13 @@ def add_manual_debt(company_id):
 
 @app.route("/api/contratos/cliente/<int:company_id>", methods=['GET'])
 def get_contracts(company_id):
+    """Endpoint para listar todos os contratos de um cliente."""
     contracts = database.get_all_contracts_with_company_info(company_id=company_id)
     return jsonify(contracts)
 
 @app.route("/api/contratos", methods=['POST'])
 def add_contract():
+    """Endpoint para adicionar um novo contrato."""
     data = request.json
     if not all(k in data for k in ['company_id', 'service', 'price', 'due_date']):
         return jsonify({"error": "Missing required fields"}), 400
@@ -203,6 +258,7 @@ def add_contract():
 
 @app.route("/api/reputacao/reclameaqui/<int:company_id>", methods=['POST'])
 def update_ra_data(company_id):
+    """Endpoint para consultar e atualizar dados do Reclame Aqui."""
     data = request.json
     slug = data.get('slug')
     if not slug:
@@ -218,6 +274,7 @@ def update_ra_data(company_id):
 
 @app.route("/api/alerts/<int:company_id>", methods=['GET'])
 def get_alerts(company_id):
+    """Endpoint que analisa e gera uma lista de alertas e insights."""
     alerts = []
     company = next((c for c in database.get_all_companies() if c['id'] == company_id), None)
     if not company:
@@ -241,9 +298,10 @@ def get_alerts(company_id):
 
 @app.route("/api/sidebar/notifications/<int:company_id>", methods=['GET'])
 def get_sidebar_notifications(company_id):
+    """Endpoint que calcula e retorna os números para as notificações da sidebar."""
     alerts_response = get_alerts(company_id)
     if alerts_response.status_code != 200:
-        return alerts_response
+        return alerts_response # Propagate error
 
     alerts = alerts_response.get_json()
     high_priority_alerts = sum(1 for alert in alerts if alert.get('priority') == 'alta')
@@ -259,5 +317,6 @@ def get_sidebar_notifications(company_id):
     return jsonify(notifications)
 
 
+# Executa o servidor quando o script é chamado
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

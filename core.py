@@ -16,6 +16,7 @@ import ui
 import database
 import openai
 import google.generativeai as genai
+import sqlite3
 
 # Configuração das APIs de IA
 if OPENAI_API_KEY and "SUA_CHAVE" not in OPENAI_API_KEY:
@@ -371,3 +372,55 @@ def generate_recommendations(company_id):
     all_recs = gpt_recs + gemini_recs
     unique_recs = {rec['title'].lower().strip(): rec for rec in all_recs}.values()
     return list(unique_recs)
+
+# ... (no final do arquivo core.py)
+
+def generate_cash_flow_projection_chart_data(company_id, contracts):
+    """Gera dados de projeção de fluxo de caixa para 6 meses."""
+    conn = sqlite3.connect(database.DB_FILE)
+    cursor = conn.cursor()
+
+    # Pega a média de despesas manuais dos últimos 3 meses
+    three_months_ago = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-01')
+    cursor.execute("""
+        SELECT SUM(amount) FROM financial_transactions
+        WHERE transaction_type = 'saida' AND company_id = ? AND transaction_date >= ?
+    """, (company_id, three_months_ago))
+    total_expenses_last_3_months = cursor.fetchone()[0] or 0.0
+    avg_monthly_expenses = total_expenses_last_3_months / 3
+
+    conn.close()
+    
+    # Calcula a receita mensal recorrente dos contratos
+    monthly_revenue = sum(c['monthly_price'] for c in contracts)
+
+    # Pega o saldo atual
+    summary = database.get_financial_summary(company_id)
+    current_balance = summary['balance']
+
+    projection_data = []
+    balance = current_balance
+
+    for i in range(6): # Projeção para 6 meses
+        month_date = datetime.now() + timedelta(days=30*i)
+        month_name = month_date.strftime('%b') # Formato 'Jan', 'Fev', etc.
+
+        # Para o primeiro mês, consideramos as despesas e receitas proporcionais
+        if i == 0:
+            days_left_in_month = 30 - datetime.now().day
+            entradas = (monthly_revenue / 30) * days_left_in_month
+            saidas = (avg_monthly_expenses / 30) * days_left_in_month
+        else:
+            entradas = monthly_revenue
+            saidas = avg_monthly_expenses
+
+        balance += entradas - saidas
+        
+        projection_data.append({
+            "name": month_name,
+            "Entradas": round(entradas, 2),
+            "Saídas": round(saidas, 2),
+            "Saldo": round(balance, 2)
+        })
+        
+    return projection_data

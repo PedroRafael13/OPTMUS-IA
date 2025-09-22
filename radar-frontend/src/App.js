@@ -14,6 +14,8 @@ import DebtAnalysisPage from './pages/DebtAnalysisPage';
 import ContractsPage from './pages/ContractsPage';
 import RecommendationsPage from './pages/RecommendationsPage';
 import MarketPage from './pages/MarketPage';
+import FinancialDashboardPage from './pages/FinancialDashboardPage';
+
 
 import './App.css';
 
@@ -62,6 +64,7 @@ function App() {
       case 'contracts': return <ContractsPage company={selectedCompany} />;
       case 'recommendations': return <RecommendationsPage company={selectedCompany} />;
       case 'market': return <MarketPage company={selectedCompany} onAnalysisComplete={setSelectedCompany} />;
+      case 'financials': return <FinancialDashboardPage company={selectedCompany} />;
       case 'benchmarking': return <BenchmarkingPage />;
       default: return <GeneralDashboard company={selectedCompany} />;
     }
@@ -110,4 +113,3 @@ function App() {
 }
 
 export default App;
-
