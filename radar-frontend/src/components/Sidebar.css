@@ -67,6 +67,10 @@
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
   font-weight: 600;
+  /* MODIFICAÇÕES PARA O BOTÃO DE EXCLUSÃO */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .company-item:hover {
   background-color: #4a488a;
@@ -74,6 +78,43 @@
 .company-item.selected {
   background-color: #007bff;
 }
+
+/* --- NOVOS ESTILOS ADICIONADOS --- */
+
+.company-name {
+  flex-grow: 1; /* Garante que o nome ocupe o espaço e empurre o botão */
+  /* Impede que o texto quebre e se sobreponha ao botão */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px; /* Pequeno espaço entre o nome e o botão */
+}
+
+.delete-client-btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 22px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0; /* Começa invisível */
+  transition: opacity 0.2s ease-in-out;
+  flex-shrink: 0; /* Impede que o botão encolha se o nome for grande */
+}
+
+.company-item:hover .delete-client-btn {
+  opacity: 1; /* Botão aparece ao passar o mouse no item */
+}
+
+.delete-client-btn:hover {
+  background-color: #cc0000; /* Cor mais escura no hover */
+}
+
+/* --- FIM DOS NOVOS ESTILOS --- */
 
 .main-nav {
   display: flex;
@@ -91,7 +132,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* --- NOVAS REGRAS PARA CORRIGIR O DESIGN DO BOTÃO --- */
+    /* --- REGRAS PARA CORRIGIR O DESIGN DO BOTÃO --- */
     background: none;
     border: none;
     width: 100%;
@@ -99,7 +140,7 @@
     font-family: inherit;
     font-size: inherit;
     cursor: pointer;
-    /* --- FIM DAS NOVAS REGRAS --- */
+    /* --- FIM DAS REGRAS --- */
 }
 .nav-item:hover {
     color: #fff;

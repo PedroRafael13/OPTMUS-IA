@@ -1,36 +1,96 @@
-.register-form h3 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #2c2a5a;
+/* --- ESTRUTURA E CABEÇALHO DO FORMULÁRIO --- */
+.form-header {
+  margin-bottom: 1.5rem;
 }
+
+.form-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: #2c2a5a;
+  font-size: 1.5rem; /* Título maior e mais impactante */
+}
+
+.form-header p {
+  margin: 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+/* --- GRUPO DE CAMPOS (LABEL + INPUT) --- */
 .form-group {
-    margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
+
 .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #555;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #3f3d7e; /* Cor mais alinhada com a identidade visual */
+  font-size: 0.9rem;
 }
-.form-group input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+
+/* --- ESTILO UNIFICADO PARA INPUTS, SELECTS E TEXTAREAS --- */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.85rem 1rem; /* Mais padding interno para respiro */
+  border: 1px solid #dcdfe6; /* Borda mais suave */
+  border-radius: 8px; /* Bordas mais arredondadas */
+  font-size: 1rem;
+  background-color: #f7f9fc; /* Fundo sutil */
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1e87f0;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(30, 135, 240, 0.15); /* Efeito de foco sutil */
+}
+
+.form-group textarea {
+  resize: vertical; /* Permite apenas o redimensionamento vertical */
+  min-height: 100px;
+}
+
+/* --- ÁREA DE AÇÕES (BOTÕES) --- */
 .form-actions {
-    margin-top: 2rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
 }
-/* ... estilos existentes ... */
-.form-group select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-    background-color: white;
+
+/* Estilos dos botões (você pode ter isso em um CSS global também) */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.btn:hover {
+  background-color: #f0f0f0;
+}
+
+.btn.btn-primary {
+  background-color: #1e87f0;
+  color: #fff;
+  border-color: #1e87f0;
+}
+
+.btn.btn-primary:hover {
+  background-color: #0d73d8;
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 }

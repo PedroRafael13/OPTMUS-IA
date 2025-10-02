@@ -1,38 +1,163 @@
-.market-analysis-page .market-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+.market-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
 }
 
-.market-analysis-page h3 {
-    margin: 0;
+@media (max-width: 1024px) {
+    .market-page {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.card h3 {
+    margin-top: 0;
     color: #2c2a5a;
 }
 
-.insights-section {
-    margin-top: 2rem;
-    background-color: #fff;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+/* Formulário e Lista de Concorrentes */
+.competitor-form {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.competitor-form input {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.competitor-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-.insights-section h3 {
-    margin-top: 0;
+.csv-import {
+    margin-bottom: 1.5rem;
+}
+.csv-label {
+    background-color: #f0f0f0;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+.csv-import input[type="file"] {
+    display: none;
+}
+.csv-import small {
+    display: block;
+    color: #777;
 }
 
-.insights-section ul {
-    list-style: none;
-    padding: 0;
+.competitor-list {
+    max-height: 200px;
+    overflow-y: auto;
 }
-
-.insights-section li {
+.competitor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 0.75rem 0;
     border-bottom: 1px solid #eee;
-    line-height: 1.6;
 }
-
-.insights-section li:last-child {
+.competitor-item:last-child {
     border-bottom: none;
 }
+.competitor-item button {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    line-height: 24px;
+}
+
+/* Chat com IA */
+.ai-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.ai-selector button {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.ai-selector button.active {
+    background-color: #3f3d7e;
+    color: white;
+    border-color: #3f3d7e;
+}
+
+.chat-box {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+.chat-history {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+.chat-message {
+    margin-bottom: 1rem;
+}
+.chat-message p {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: 12px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+.chat-message.user p {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 0;
+    margin-left: auto;
+}
+.chat-message.ai p {
+    background-color: #f1f1f1;
+    color: #333;
+    border-bottom-left-radius: 0;
+}
+.chat-input-form {
+    display: flex;
+    border-top: 1px solid #eee;
+}
+.chat-input-form input {
+    flex-grow: 1;
+    border: none;
+    padding: 1rem;
+    outline: none;
+}
+.chat-input-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    cursor: pointer;
+}
+
+    

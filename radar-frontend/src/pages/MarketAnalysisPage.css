@@ -1,0 +1,264 @@
+/* --- ESTRUTURA GERAL E LAYOUT --- */
+.market-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem; /* Aumentado para mais respiro */
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .market-page {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- ESTILO DE CARD APRIMORADO --- */
+.card {
+    background-color: #fff;
+    border-radius: 16px; /* Bordas mais suaves */
+    padding: 0; /* Padding será controlado pelo header e body */
+    box-shadow: 0 8px 24px rgba(44, 42, 90, 0.04); /* Sombra mais profissional */
+    border: 1px solid #e0e6f1; /* Borda sutil para definição */
+    margin-bottom: 2.5rem; /* Aumentado para mais respiro */
+    overflow: hidden; /* Garante que o conteúdo respeite as bordas arredondadas */
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    background-color: #f7f9fc;
+    border-bottom: 1px solid #e0e6f1;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #3f3d7e;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+
+/* --- FORMULÁRIO E LISTA DE CONCORRENTES --- */
+.competitor-form {
+    display: grid;
+    grid-template-columns: 1fr; /* Coluna única para mais organização */
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.competitor-form input {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f7f9fc;
+}
+.competitor-form input:focus {
+    outline: none;
+    border-color: #1e87f0;
+    background-color: #fff;
+}
+.competitor-form button {
+    background-color: #1e87f0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.form-separator {
+    border: none;
+    border-top: 1px solid #e0e6f1;
+    margin: 1.5rem 0;
+}
+
+.csv-import {
+    margin-top: 1.5rem;
+}
+.csv-label {
+    background-color: transparent;
+    border: 1px solid #1e87f0;
+    color: #1e87f0;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s;
+}
+.csv-label:hover {
+    background-color: #e8f3ff;
+}
+.csv-import input[type="file"] {
+    display: none;
+}
+.csv-import small {
+    display: block;
+    color: #777;
+}
+
+.competitor-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 1.5rem;
+}
+.competitor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #f7f9fc;
+    margin-bottom: 0.75rem;
+}
+.competitor-item strong {
+    color: #3f3d7e;
+}
+.competitor-item button {
+    background: #e0e6f1;
+    color: #555;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    line-height: 24px;
+    transition: all 0.2s;
+}
+.competitor-item button:hover {
+    background: #ff4d4d;
+    color: white;
+}
+
+
+/* --- CHAT COM IA --- */
+.ai-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.ai-selector button {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.ai-selector button.active {
+    background-color: #3f3d7e;
+    color: white;
+    border-color: #3f3d7e;
+}
+
+.chat-box {
+    border: 1px solid #e0e6f1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 450px; /* Um pouco mais de altura */
+}
+.chat-history {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+/* ESTADO VAZIO DO CHAT */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 1rem;
+    color: #777;
+}
+.empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.chat-empty-state h4 { 
+    color: #3f3d7e; 
+    margin: 0 0 0.5rem 0;
+}
+.chat-empty-state p { 
+    margin: 0; 
+}
+.suggestion-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 300px;
+}
+.suggestion-buttons button {
+    background-color: #f0f4ff;
+    border: 1px solid #d6e2ff;
+    color: #3f3d7e;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.85rem;
+}
+.suggestion-buttons button:hover {
+    background-color: #e0e9ff;
+}
+
+/* MENSAGENS DO CHAT */
+.chat-message {
+    margin-bottom: 1rem;
+    display: flex;
+}
+.chat-message p {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 85%;
+    line-height: 1.5;
+}
+.chat-message.user {
+    justify-content: flex-end;
+}
+.chat-message.user p {
+    background-color: #1e87f0;
+    color: white;
+    border-bottom-right-radius: 0;
+}
+.chat-message.ai {
+    justify-content: flex-start;
+}
+.chat-message.ai p {
+    background-color: #f1f1f1;
+    color: #333;
+    border-bottom-left-radius: 0;
+}
+
+/* INPUT DO CHAT */
+.chat-input-form {
+    display: flex;
+    border-top: 1px solid #e0e6f1;
+}
+.chat-input-form input {
+    flex-grow: 1;
+    border: none;
+    padding: 1rem;
+    outline: none;
+    background-color: #f7f9fc;
+    border-bottom-left-radius: 16px; /* Borda alinhada com o card */
+}
+.chat-input-form button {
+    background-color: #1e87f0;
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    cursor: pointer;
+    border-bottom-right-radius: 16px; /* Borda alinhada com o card */
+}

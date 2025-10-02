@@ -1,6 +1,6 @@
 // src/components/GenerateRecsForm.js
 import React, { useState } from 'react';
-import './RegisterClientForm.css'; // Continua reutilizando os estilos aprimorados
+import './RegisterClientForm.css'; // Reutilizando estilos
 
 const GenerateRecsForm = ({ onSubmit, onCancel, isGenerating }) => {
   const [focusArea, setFocusArea] = useState('Marketing');
@@ -8,21 +8,13 @@ const GenerateRecsForm = ({ onSubmit, onCancel, isGenerating }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!objective.trim()) {
-      alert('Por favor, preencha o objetivo específico.');
-      return;
-    }
     onSubmit({ focus_area: focusArea, objective });
   };
 
   return (
-    // Removido o className="register-form" pois os estilos agora são mais genéricos
-    <form onSubmit={handleSubmit}>
-      {/* NOVO: Cabeçalho estruturado */}
-      <div className="form-header">
-        <h3>Gerar Novas Recomendações</h3>
-        <p>Forneça um contexto para que a IA gere sugestões mais precisas.</p>
-      </div>
+    <form onSubmit={handleSubmit} className="register-form">
+      <h3>Gerar Novas Recomendações</h3>
+      <p>Forneça um contexto para que a IA gere sugestões mais precisas.</p>
       
       <div className="form-group">
         <label htmlFor="focusArea">Área de Foco Principal</label>
@@ -38,7 +30,7 @@ const GenerateRecsForm = ({ onSubmit, onCancel, isGenerating }) => {
         <label htmlFor="objective">Objetivo Específico</label>
         <textarea 
             id="objective" 
-            rows="4" // Um pouco mais de altura
+            rows="3"
             value={objective} 
             onChange={(e) => setObjective(e.target.value)} 
             placeholder="Ex: Aumentar a receita em 15% no próximo semestre, reduzir a inadimplência, capturar clientes do concorrente X, etc."
@@ -47,11 +39,9 @@ const GenerateRecsForm = ({ onSubmit, onCancel, isGenerating }) => {
       </div>
 
       <div className="form-actions">
-        <button type="button" className="btn" onClick={onCancel} disabled={isGenerating}>
-          Cancelar
-        </button>
+        <button type="button" className="btn" onClick={onCancel} disabled={isGenerating}>Cancelar</button>
         <button type="submit" className="btn btn-primary" disabled={isGenerating}>
-          {isGenerating ? 'Gerando...' : 'Gerar Recomendações'}
+          {isGenerating ? 'Gerando...' : 'Gerar'}
         </button>
       </div>
     </form>
