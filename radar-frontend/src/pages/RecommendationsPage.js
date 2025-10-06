@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
+// src/pages/RecommendationsPage.js
+
+import React, { useState, useEffect, useCallback } from 'react';
+import Modal from '../components/Modal';
+import GenerateRecsForm from '../components/GenerateRecsForm';
 import './RecommendationsPage.css';
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 const RecommendationsPage = ({ company }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
+    if (!company) return;
     setIsLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/recomendacoes/${company.id}`);
+      const response = await fetch(`${API_URL}/api/recomendacoes/${company.id}`);
       const data = await response.json();
       setRecommendations(data);
     } catch (error) {
@@ -17,22 +25,22 @@ const RecommendationsPage = ({ company }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (company) {
-      fetchRecommendations();
-    }
   }, [company]);
 
-  const handleGenerate = async () => {
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
+
+  const handleGenerateSubmit = async (formData) => {
     setIsGenerating(true);
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/recomendacoes/${company.id}/gerar`, {
+      const response = await fetch(`${API_URL}/api/recomendacoes/${company.id}/gerar`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       });
       if (response.ok) {
-        alert('Novas recomendações geradas com sucesso!');
+        setIsModalOpen(false);
         fetchRecommendations(); // Re-fetch para exibir as novas
       } else {
         alert('Falha ao gerar novas recomendações.');
@@ -41,6 +49,24 @@ const RecommendationsPage = ({ company }) => {
       console.error("Erro ao gerar recomendações:", error);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleClear = async () => {
+    if (window.confirm("Tem certeza que deseja limpar todas as recomendações para este cliente?")) {
+      try {
+        const response = await fetch(`${API_URL}/api/recomendacoes/${company.id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          setRecommendations([]);
+          alert('Recomendações excluídas com sucesso.');
+        } else {
+          alert('Falha ao excluir recomendações.');
+        }
+      } catch (error) {
+        console.error("Erro ao excluir recomendações:", error);
+      }
     }
   };
 
@@ -56,9 +82,16 @@ const RecommendationsPage = ({ company }) => {
     <div className="recommendations-page">
       <div className="recommendations-header">
         <h3>Recomendações Estratégicas (IA)</h3>
-        <button className="btn btn-primary" onClick={handleGenerate} disabled={isGenerating}>
-          {isGenerating ? 'Gerando...' : 'Gerar Novas Recomendações'}
-        </button>
+        <div className="header-actions">
+          {recommendations.length > 0 && (
+            <button className="btn btn-secondary" onClick={handleClear}>
+              Limpar Sugestões
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            Gerar Novas Recomendações
+          </button>
+        </div>
       </div>
       <div className="recommendations-grid">
         {recommendations.length > 0 ? (
@@ -70,16 +103,27 @@ const RecommendationsPage = ({ company }) => {
               </div>
               <p>{rec.description}</p>
               <div className="rec-card-footer">
-                <span><strong>Investimento:</strong> R$ {rec.investment.toLocaleString()}</span>
-                <span><strong>ROI:</strong> {rec.roi}%</span>
-                <span><strong>Prazo:</strong> {rec.timeline} meses</span>
+                <span><strong>Invest.:</strong> R$ {(rec.investment || 0).toLocaleString()}</span>
+                <span><strong>ROI:</strong> {rec.roi || 0}%</span>
+                <span><strong>Prazo:</strong> {rec.timeline || 0} meses</span>
               </div>
             </div>
           ))
         ) : (
-          <p>Nenhuma recomendação disponível. Clique em "Gerar Novas Recomendações" para começar.</p>
+          <div className="no-recommendations">
+            <p>Nenhuma recomendação disponível.</p>
+            <p>Clique em "Gerar Novas Recomendações" para começar.</p>
+          </div>
         )}
       </div>
+
+      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <GenerateRecsForm 
+            onSubmit={handleGenerateSubmit} 
+            onCancel={() => setIsModalOpen(false)}
+            isGenerating={isGenerating}
+        />
+      </Modal>
     </div>
   );
 };

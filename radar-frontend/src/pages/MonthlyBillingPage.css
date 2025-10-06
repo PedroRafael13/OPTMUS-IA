@@ -1,0 +1,71 @@
+.billing-page .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.billing-page h3 {
+    color: #2c2a5a;
+    margin: 0;
+    font-size: 1.8rem;
+    text-transform: capitalize;
+}
+
+.billing-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.billing-table-container th, .billing-table-container td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.billing-table-container th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.status-paid {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-pay {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-pay:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-pay:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

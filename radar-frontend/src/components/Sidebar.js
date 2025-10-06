@@ -1,17 +1,25 @@
+// src/components/Sidebar.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import './Sidebar.css';
 
-function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, onRegisterClick, refreshClients }) {
+const API_URL = process.env.REACT_APP_API_URL;
+
+// O componente agora recebe a nova prop 'onCompanyDelete'
+function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, onRegisterClick, refreshClients, onCompanyDelete }) {
   const [clientes, setClientes] = useState([]);
   const [notifications, setNotifications] = useState({});
   const [error, setError] = useState(null);
 
   const fetchClientes = useCallback(async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/clientes');
+      // Usamos 'no-store' para garantir que a lista de clientes esteja sempre atualizada
+      const response = await fetch(`${API_URL}/api/clientes`, { cache: 'no-store' });
       if (!response.ok) throw new Error('API de clientes falhou');
       const data = await response.json();
       setClientes(data);
+      
+      // Lógica para auto-selecionar o primeiro cliente, se nenhum estiver selecionado
       if (data.length > 0 && !selectedCompany) {
         onCompanySelect(data[0]);
       }
@@ -29,7 +37,7 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
     if (selectedCompany) {
       const fetchNotifications = async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:5000/api/sidebar/notifications/${selectedCompany.id}`);
+          const response = await fetch(`${API_URL}/api/sidebar/notifications/${selectedCompany.id}`, { cache: 'no-store' });
           if (!response.ok) throw new Error('API de notificações falhou');
           const data = await response.json();
           setNotifications(data);
@@ -41,6 +49,28 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
       fetchNotifications();
     }
   }, [selectedCompany]);
+
+  // NOVA FUNÇÃO para lidar com a exclusão de um cliente
+  const handleDelete = async (companyToDelete) => {
+    // Pede confirmação antes de uma ação destrutiva
+    if (window.confirm(`Tem certeza que deseja excluir "${companyToDelete.internal_alias}"? Todos os dados associados (contratos, dívidas, etc.) serão perdidos permanentemente.`)) {
+      try {
+        const response = await fetch(`${API_URL}/api/clientes/${companyToDelete.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          // Em caso de sucesso, notifica o componente pai (App.js)
+          onCompanyDelete(companyToDelete.id);
+        } else {
+          alert('Falha ao excluir o cliente.');
+        }
+      } catch (error) {
+        console.error("Erro ao excluir cliente:", error);
+        alert('Erro de conexão ao tentar excluir o cliente.');
+      }
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -65,7 +95,20 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
                 className={`company-item ${selectedCompany && selectedCompany.id === cliente.id ? 'selected' : ''}`}
                 onClick={() => onCompanySelect(cliente)}
               >
-                {cliente.internal_alias}
+                {/* O nome do cliente agora está em um span para melhor alinhamento */}
+                <span className="company-name">{cliente.internal_alias}</span>
+
+                {/* Botão de exclusão adicionado aqui */}
+                <button 
+                  className="delete-client-btn" 
+                  onClick={(e) => {
+                    // e.stopPropagation() impede que o clique no botão dispare o onClick do div pai (que seleciona o cliente)
+                    e.stopPropagation(); 
+                    handleDelete(cliente);
+                  }}
+                >
+                  &times; {/* Símbolo de "x" para fechar/excluir */}
+                </button>
               </div>
             ))}
         </div>
@@ -81,13 +124,19 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
             <span>Alertas e Insights</span>
           </button>
           <button onClick={() => onViewChange('market')} className={`nav-item ${activeView === 'market' ? 'active' : ''}`}>
-            <span>Análise de Mercado</span>
+            <span>Análise de Concorrentes</span>
           </button>
           <button onClick={() => onViewChange('recommendations')} className={`nav-item ${activeView === 'recommendations' ? 'active' : ''}`}>
             <span>Recomendações (IA)</span>
           </button>
 
           <h4 className="section-title">GESTÃO</h4>
+           <button onClick={() => onViewChange('billing')} className={`nav-item ${activeView === 'billing' ? 'active' : ''}`}>
+            <span>Faturamento</span>
+          </button>
+          <button onClick={() => onViewChange('financials')} className={`nav-item ${activeView === 'financials' ? 'active' : ''}`}>
+            <span>Financeiro</span>
+          </button>
           <button onClick={() => onViewChange('debts')} className={`nav-item ${activeView === 'debts' ? 'active' : ''}`}>
             <span>Análise de Dívidas</span>
             {notifications.dividas > 0 && <span className="notification-badge error">{notifications.dividas}</span>}
@@ -95,6 +144,9 @@ function Sidebar({ onCompanySelect, onViewChange, activeView, selectedCompany, o
           <button onClick={() => onViewChange('contracts')} className={`nav-item ${activeView === 'contracts' ? 'active' : ''}`}>
             <span>Contratos</span>
             {notifications.contratos > 0 && <span className="notification-badge warning">{notifications.contratos}</span>}
+          </button>
+          <button onClick={() => onViewChange('panel')} className={`nav-item ${activeView === 'panel' ? 'active' : ''}`}
+            ><span>Painel de Dados</span>
           </button>
       </nav>
     </aside>

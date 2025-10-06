@@ -8,7 +8,11 @@ const RevenueChart = ({ data }) => {
     <div className="chart-container">
       <h3>Evolução da Receita</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <LineChart 
+          data={data} 
+          // A correção está na linha abaixo: aumentamos a margem superior
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis tickFormatter={(value) => `R$ ${value/1000}K`} />

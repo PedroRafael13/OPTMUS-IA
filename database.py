@@ -129,6 +129,35 @@ def setup_database():
         FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
     );
     """)
+
+    # Tabela de pagamentos mensais de contratos
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS monthly_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        contract_id INTEGER NOT NULL,
+        payment_month TEXT NOT NULL, -- Formato 'YYYY-MM'
+        payment_date TEXT DEFAULT CURRENT_TIMESTAMP,
+        transaction_id INTEGER NOT NULL,
+        UNIQUE(contract_id, payment_month),
+        FOREIGN KEY (contract_id) REFERENCES contracts (id) ON DELETE CASCADE,
+        FOREIGN KEY (transaction_id) REFERENCES financial_transactions (id) ON DELETE CASCADE
+    );
+    """)
+
+    # Tabela de Concorrentes para Análise de Mercado
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS competitors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        company_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        location TEXT,
+        revenue REAL,
+        strengths TEXT,
+        weaknesses TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+    );
+    """)
     
     conn.commit()
     conn.close()
@@ -239,16 +268,16 @@ def add_new_contract(company_id, service, price, responsible, due_date_str):
     finally:
         conn.close()
 
-def add_new_transaction(trans_date, trans_type, amount, description, company_id=None):
+def add_new_transaction(trans_date, trans_type, amount, description, company_id=None, contract_id=None):
     """Adiciona uma nova transação financeira."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO financial_transactions (transaction_date, transaction_type, amount, description, company_id) VALUES (?, ?, ?, ?, ?)", (trans_date, trans_type, amount, description, company_id))
+        cursor.execute("INSERT INTO financial_transactions (transaction_date, transaction_type, amount, description, company_id, contract_id) VALUES (?, ?, ?, ?, ?, ?)", (trans_date, trans_type, amount, description, company_id, contract_id))
         conn.commit()
-        return True
+        return cursor.lastrowid
     except sqlite3.Error:
-        return False
+        return None
     finally:
         conn.close()
 
@@ -300,7 +329,7 @@ def get_all_contracts_with_company_info(company_id=None):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    query = "SELECT c.id as contract_id, co.internal_alias as company_name, c.service_description, c.monthly_price, c.responsible_person, c.due_date FROM contracts c JOIN companies co ON c.company_id = co.id"
+    query = "SELECT c.id as contract_id, co.id as company_id, co.internal_alias as company_name, c.service_description, c.monthly_price, c.responsible_person, c.due_date FROM contracts c JOIN companies co ON c.company_id = co.id"
     params = []
     if company_id:
         query += " WHERE c.company_id = ?"
@@ -340,7 +369,6 @@ def get_financial_dashboard_data(period_days=30, company_id=None):
     end_date_previous = start_date_current
     start_date_previous = end_date_previous - timedelta(days=period_days)
 
-    # Base query
     base_query = """
         SELECT
             transaction_type,
@@ -349,7 +377,6 @@ def get_financial_dashboard_data(period_days=30, company_id=None):
         FROM financial_transactions
     """
     
-    # Parameters for the date ranges
     params = [
         start_date_current.strftime('%Y-%m-%d'), 
         end_date.strftime('%Y-%m-%d'), 
@@ -357,7 +384,6 @@ def get_financial_dashboard_data(period_days=30, company_id=None):
         end_date_previous.strftime('%Y-%m-%d')
     ]
 
-    # Dynamically add a WHERE clause if a company_id is provided
     if company_id:
         query = base_query + " WHERE company_id = ? GROUP BY transaction_type;"
         params.append(company_id)
@@ -462,3 +488,117 @@ def get_expiring_contracts(days_ahead=90, company_id=None):
     contracts = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return contracts
+
+def get_contracts_for_billing(month_str, company_id=None):
+    """Busca contratos ativos e verifica se já foram pagos no mês especificado."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT
+            c.id as contract_id,
+            co.id as company_id,
+            co.internal_alias as company_name,
+            c.service_description,
+            c.monthly_price,
+            CASE
+                WHEN p.id IS NOT NULL THEN 1
+                ELSE 0
+            END as is_paid
+        FROM contracts c
+        JOIN companies co ON c.company_id = co.id
+        LEFT JOIN monthly_payments p ON c.id = p.contract_id AND p.payment_month = ?
+    """
+    params = [month_str]
+
+    if company_id:
+        query += " WHERE c.company_id = ?"
+        params.append(company_id)
+
+    query += " ORDER BY co.internal_alias, c.service_description;"
+    
+    cursor.execute(query, params)
+    contracts = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return contracts
+
+def mark_contract_as_paid(contract_id, company_id, amount, month_str):
+    """Registra uma transação de entrada e marca o contrato como pago para o mês."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    try:
+        transaction_date = datetime.now().strftime('%Y-%m-%d')
+        description = f"Pagamento do contrato {contract_id} referente ao mês {month_str}"
+        
+        cursor.execute(
+            "INSERT INTO financial_transactions (transaction_date, transaction_type, amount, description, company_id, contract_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (transaction_date, 'entrada', amount, description, company_id, contract_id)
+        )
+        transaction_id = cursor.lastrowid
+
+        cursor.execute(
+            "INSERT INTO monthly_payments (contract_id, payment_month, transaction_id) VALUES (?, ?, ?)",
+            (contract_id, month_str, transaction_id)
+        )
+        
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        return False
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+def delete_recommendations(company_id):
+    """Exclui todas as recomendações para uma empresa específica."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM recommendations WHERE company_id = ?", (company_id,))
+        conn.commit()
+        return True
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return False
+    finally:
+        conn.close()
+
+def get_competitors(company_id):
+    """Busca todos os concorrentes de uma empresa."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM competitors WHERE company_id = ? ORDER BY revenue DESC", (company_id,))
+    competitors = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return competitors
+
+def add_competitor(company_id, name, location, revenue):
+    """Adiciona um novo concorrente."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO competitors (company_id, name, location, revenue) VALUES (?, ?, ?, ?)",
+            (company_id, name, location, revenue)
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+def delete_competitor(competitor_id):
+    """Exclui um concorrente pelo seu ID."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM competitors WHERE id = ?", (competitor_id,))
+    conn.commit()
+    deleted_rows = cursor.rowcount
+    conn.close()
+    return deleted_rows > 0
